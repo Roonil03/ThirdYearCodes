@@ -1,0 +1,7 @@
+$ ./list.sh 
+a  a1.c  a2.c  abc.c  all.sh  b133.c  b4.c  list.sh  mno.go  temp.sh  t.txt  xyz.py
+t.txt
+a1.c  a2.c  b133.c  b4.c
+b133.c	list.sh  temp.sh
+b133.c	b4.c  list.sh  mno.go  temp.sh	t.txt  xyz.py
+

@@ -1,0 +1,19 @@
+./all.sh 
+abc.c: C source, ASCII text
+xyz.py: ASCII text
+mno.go: C source, ASCII text
+echo "Hello World"
+
+echo "New Lines"
+echo "Hello World"
+
+echo "New Lines"
+echo "Hello World"
+
+echo "New Lines"
+/usr/bin/cat
+/usr/bin/ls
+nano: /usr/bin/nano /usr/share/nano /usr/share/man/man1/nano.1.gz /usr/share/info/nano.info.gz
+find: paths must precede expression: `list.sh'
+find: possible unquoted pattern after predicate `-name'?
+
