@@ -1,0 +1,4 @@
+- SSE 
+- RSA Digital Signature
+- Any SHA apart from SHA256
+- Leetcode Question - Affine Decrypt and Encrypt on small amount of SSE data for verification of encryption)
