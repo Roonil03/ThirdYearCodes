@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:TalendProperties="http://www.talend.org/properties">
+  <TalendProperties:Property xmi:id="_haYpoO0-EfC-183a0onERQ" id="_haUYMO0-EfC-183a0onERQ" label="Lab1TestingJob" purpose="This job is made for lab 1." description="This job is made for lab 1" version="0.1" statusCode="" item="_haYpou0-EfC-183a0onERQ" displayName="Lab1TestingJob">
+    <author href="../talend.project#_UmuJ4O0-EfC-183a0onERQ"/>
+    <additionalProperties xmi:id="_habF4O0-EfC-183a0onERQ" key="created_product_fullname" value="Talend Open Studio for Data Integration"/>
+    <additionalProperties xmi:id="_habF4e0-EfC-183a0onERQ" key="created_product_version" value="8.0.1.20211109_1610"/>
+    <additionalProperties xmi:id="_habF4u0-EfC-183a0onERQ" key="created_date" value="2026-01-09T15:05:23.454+0530"/>
+    <additionalProperties xmi:id="_habF4-0-EfC-183a0onERQ" key="modified_product_fullname" value="Talend Open Studio for Data Integration"/>
+    <additionalProperties xmi:id="_habF5O0-EfC-183a0onERQ" key="modified_product_version" value="8.0.1.20211109_1610"/>
+    <additionalProperties xmi:id="_habF5e0-EfC-183a0onERQ" key="modified_date" value="2026-01-09T15:24:40.822+0530"/>
+  </TalendProperties:Property>
+  <TalendProperties:ItemState xmi:id="_haYpoe0-EfC-183a0onERQ" path="" locked="true" lockDate="2026-01-09T15:05:24.464+0530">
+    <locker href="../talend.project#_UmuJ4O0-EfC-183a0onERQ"/>
+  </TalendProperties:ItemState>
+  <TalendProperties:ProcessItem xmi:id="_haYpou0-EfC-183a0onERQ" property="_haYpoO0-EfC-183a0onERQ" state="_haYpoe0-EfC-183a0onERQ">
+    <process href="Lab1TestingJob_0.1.item#/"/>
+  </TalendProperties:ProcessItem>
+</xmi:XMI>
