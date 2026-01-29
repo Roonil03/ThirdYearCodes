@@ -1,0 +1,13 @@
+INDEX VERSION 1.131+C:\TimeToShine\TalenDLabPractice\.metadata\.plugins\org.eclipse.jdt.core
+1255119122.index
+3489426540.index
+2558992355.index
+1984709738.index
+1230445429.index
+1029217099.index
+1904287336.index
+3465864848.index
+2909193166.index
+931210709.index
+180869197.index
+1143488546.index

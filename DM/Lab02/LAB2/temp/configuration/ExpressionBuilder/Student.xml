@@ -1,0 +1,17 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<expression:EMFExpression xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:expression="http:///expression.ecore" id="tMap_6=>" expression="row31.marks">
+  <variables name="row31.Regno" value="null" talendType="id_Integer" nullable="true"/>
+  <variables name="row31.Name" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.Major" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.Bdate" value="null" talendType="id_Date" nullable="true"/>
+  <variables name="row31.Course_ID" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.Cname" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.dept" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.marks" value="null" talendType="id_Integer" nullable="true"/>
+  <variables name="row31.sem" value="null" talendType="id_Integer" nullable="true"/>
+  <variables name="row31.ISBN" value="null" talendType="id_Integer" nullable="true"/>
+  <variables name="row31.book_ISBN" value="null" talendType="id_Integer" nullable="true"/>
+  <variables name="row31.title" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.publisher" value="null" talendType="id_String" nullable="true"/>
+  <variables name="row31.author" value="null" talendType="id_String" nullable="true"/>
+</expression:EMFExpression>

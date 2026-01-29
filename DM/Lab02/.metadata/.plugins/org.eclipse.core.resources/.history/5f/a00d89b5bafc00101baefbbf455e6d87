@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:TalendProperties="http://www.talend.org/properties">
+  <TalendProperties:Property xmi:id="_tKXZkPy6EfC8soNIsD-kWQ" id="_tKR6APy6EfC8soNIsD-kWQ" label="Hospital" purpose="Admin account" version="0.1" statusCode="" item="_tKXZkvy6EfC8soNIsD-kWQ" displayName="Hospital">
+    <author href="../talend.project#_zl-AgPy5EfC8soNIsD-kWQ"/>
+    <additionalProperties xmi:id="_tKYAoPy6EfC8soNIsD-kWQ" key="created_product_fullname" value="Talend Open Studio for Data Integration"/>
+    <additionalProperties xmi:id="_tKYAofy6EfC8soNIsD-kWQ" key="created_product_version" value="8.0.1.20211109_1610"/>
+    <additionalProperties xmi:id="_tKYAovy6EfC8soNIsD-kWQ" key="created_date" value="2026-01-29T08:02:07.338+0530"/>
+    <additionalProperties xmi:id="_tKYAo_y6EfC8soNIsD-kWQ" key="modified_product_fullname" value="Talend Open Studio for Data Integration"/>
+    <additionalProperties xmi:id="_tKYApPy6EfC8soNIsD-kWQ" key="modified_product_version" value="8.0.1.20211109_1610"/>
+    <additionalProperties xmi:id="_tKYApfy6EfC8soNIsD-kWQ" key="modified_date" value="2026-01-29T08:02:07.590+0530"/>
+  </TalendProperties:Property>
+  <TalendProperties:ItemState xmi:id="_tKXZkfy6EfC8soNIsD-kWQ" path=""/>
+  <TalendProperties:ProcessItem xmi:id="_tKXZkvy6EfC8soNIsD-kWQ" property="_tKXZkPy6EfC8soNIsD-kWQ" state="_tKXZkfy6EfC8soNIsD-kWQ">
+    <process href="Hospital_0.1.item#/"/>
+  </TalendProperties:ProcessItem>
+</xmi:XMI>
