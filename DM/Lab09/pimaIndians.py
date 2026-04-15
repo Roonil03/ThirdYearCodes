@@ -116,7 +116,7 @@ def classification_report_manual(y_true, y_pred, zero_division=0):
     lines.append(f"{'weighted avg':>12}{weighted_precision:>12.4f}{weighted_recall:>12.4f}{weighted_f1:>12.4f}{len(y_true):>12}")
     return "\n".join(lines)
 
-file_path = "diabetes.csv"
+file_path = ".\\diabetes.csv"
 
 df = pd.read_csv(file_path)
 
@@ -131,17 +131,14 @@ if list(df.columns) != expected_cols and len(df.columns) == 9:
     if df.columns[0] != "Pregnancies":
         df = pd.read_csv(file_path, header=None, names=expected_cols)
 
-# Replace impossible zero values with median
 zero_as_missing = ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"]
 for col in zero_as_missing:
     df[col] = df[col].replace(0, np.nan)
     df[col] = df[col].fillna(df[col].median())
 
-# Features and target
 X = df.drop("Outcome", axis=1)
 y = df["Outcome"]
 
-# Manual train-test split
 X_train, X_test, y_train, y_test = stratified_train_test_split(
     X, y,
     test_size=0.2,
@@ -170,7 +167,7 @@ print(f"Accuracy : {accuracy:.4f}")
 print(f"Precision: {precision:.4f}")
 print(f"Recall   : {recall:.4f}")
 
-print("\n===== Pima Indians Diabetes : Gaussian Naive Bayes =====")
+print("\nPima Indians Diabetes : Gaussian Naive Bayes")
 print("\nConfusion Matrix:")
 print(cm)
 print(f"\nAccuracy : {accuracy:.4f}")
