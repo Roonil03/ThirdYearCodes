@@ -1,7 +1,7 @@
 import re
 import math
 import numpy as np
-from collections import Counter, defaultdict
+from collections import Counter
 from sklearn.datasets import fetch_20newsgroups
 
 ENGLISH_STOP_WORDS = {
@@ -44,8 +44,10 @@ class CountVectorizerManual:
         for doc in documents:
             tokens = set(self._tokenize(doc))
             doc_freq.update(tokens)
+
         vocab_tokens = [token for token, df in doc_freq.items() if df >= self.min_df]
         vocab_tokens.sort()
+
         self.vocabulary_ = {token: idx for idx, token in enumerate(vocab_tokens)}
         self.feature_names_ = vocab_tokens
         return self
@@ -61,6 +63,7 @@ class CountVectorizerManual:
                     counts[token_id] += 1
             transformed_docs.append(counts)
         return transformed_docs
+
     def fit_transform(self, documents):
         self.fit(documents)
         return self.transform(documents)
@@ -71,7 +74,6 @@ class MultinomialNBManual:
         self.classes_ = None
         self.class_log_prior_ = {}
         self.feature_log_prob_ = {}
-        self.class_token_totals_ = {}
         self.vocab_size_ = 0
 
     def fit(self, X, y, vocab_size):
@@ -87,9 +89,8 @@ class MultinomialNBManual:
                 total_tokens_per_class[label] += count
         for cls in self.classes_:
             self.class_log_prior_[cls] = math.log(class_doc_counts[cls] / n_docs)
-            self.class_token_totals_[cls] = total_tokens_per_class[cls]
-            log_probs = {}
             denominator = total_tokens_per_class[cls] + self.alpha * self.vocab_size_
+            log_probs = {}
             for token_id in range(self.vocab_size_):
                 numerator = token_counts_per_class[cls][token_id] + self.alpha
                 log_probs[token_id] = math.log(numerator / denominator)
@@ -104,7 +105,7 @@ class MultinomialNBManual:
                 score += count * self.feature_log_prob_[cls][token_id]
             scores[cls] = score
         return scores
-
+    
     def predict(self, X):
         predictions = []
         for doc_counts in X:
@@ -112,24 +113,6 @@ class MultinomialNBManual:
             pred_class = max(scores, key=scores.get)
             predictions.append(pred_class)
         return np.array(predictions)
-    
-    def predict_proba(self, X):
-        prob_rows = []
-        for doc_counts in X:
-            scores = self._predict_log_proba_one(doc_counts)
-            class_order = list(self.classes_)
-            score_values = np.array([scores[cls] for cls in class_order], dtype=float)
-            max_score = np.max(score_values)
-            exp_scores = np.exp(score_values - max_score)
-            probs = exp_scores / np.sum(exp_scores)
-            prob_rows.append(probs)
-        return np.array(prob_rows)
-
-
-def accuracy_score_manual(y_true, y_pred):
-    y_true = np.asarray(y_true)
-    y_pred = np.asarray(y_pred)
-    return np.mean(y_true == y_pred)
 
 def confusion_matrix_manual(y_true, y_pred, labels=None):
     y_true = np.asarray(y_true)
@@ -142,10 +125,36 @@ def confusion_matrix_manual(y_true, y_pred, labels=None):
         cm[label_to_index[yt], label_to_index[yp]] += 1
     return cm
 
-def precision_recall_f1_support_manual(y_true, y_pred, labels=None, zero_division=0):
-    if labels is None:
-        labels = np.unique(np.concatenate([y_true, y_pred]))
-    cm = confusion_matrix_manual(y_true, y_pred, labels)
+def accuracy_score_manual(y_true, y_pred):
+    y_true = np.asarray(y_true)
+    y_pred = np.asarray(y_pred)
+    return np.mean(y_true == y_pred)
+
+def precision_recall_from_confusion_matrix(cm, zero_division=0):
+    n_classes = cm.shape[0]
+    precisions = []
+    recalls = []
+    supports = []
+    for i in range(n_classes):
+        tp = cm[i, i]
+        fp = cm[:, i].sum() - tp
+        fn = cm[i, :].sum() - tp
+        support = cm[i, :].sum()
+        precision = tp / (tp + fp) if (tp + fp) != 0 else zero_division
+        recall = tp / (tp + fn) if (tp + fn) != 0 else zero_division
+        precisions.append(precision)
+        recalls.append(recall)
+        supports.append(support)
+    precisions = np.array(precisions, dtype=float)
+    recalls = np.array(recalls, dtype=float)
+    supports = np.array(supports, dtype=float)
+    weighted_precision = np.average(precisions, weights=supports)
+    weighted_recall = np.average(recalls, weights=supports)
+    return precisions, recalls, supports, weighted_precision, weighted_recall
+
+def classification_report_manual(y_true, y_pred, target_names=None, zero_division=0):
+    labels = np.unique(np.concatenate([y_true, y_pred]))
+    cm = confusion_matrix_manual(y_true, y_pred, labels=labels)
     precisions = []
     recalls = []
     f1s = []
@@ -157,51 +166,15 @@ def precision_recall_f1_support_manual(y_true, y_pred, labels=None, zero_divisio
         support = cm[i, :].sum()
         precision = tp / (tp + fp) if (tp + fp) != 0 else zero_division
         recall = tp / (tp + fn) if (tp + fn) != 0 else zero_division
-        f1 = (
-            2 * precision * recall / (precision + recall)
-            if (precision + recall) != 0 else zero_division
-        )
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) != 0 else zero_division
         precisions.append(precision)
         recalls.append(recall)
         f1s.append(f1)
         supports.append(support)
-    return (
-        np.array(precisions),
-        np.array(recalls),
-        np.array(f1s),
-        np.array(supports)
-    )
-
-def precision_score_manual(y_true, y_pred, average="weighted", zero_division=0):
-    labels = np.unique(np.concatenate([y_true, y_pred]))
-    precisions, _, _, supports = precision_recall_f1_support_manual(
-        y_true, y_pred, labels, zero_division
-    )
-    if average == "macro":
-        return np.mean(precisions)
-    elif average == "weighted":
-        return np.average(precisions, weights=supports)
-    else:
-        raise ValueError("Supported averages: 'macro', 'weighted'")
-
-
-def recall_score_manual(y_true, y_pred, average="weighted", zero_division=0):
-    labels = np.unique(np.concatenate([y_true, y_pred]))
-    _, recalls, _, supports = precision_recall_f1_support_manual(
-        y_true, y_pred, labels, zero_division
-    )
-    if average == "macro":
-        return np.mean(recalls)
-    elif average == "weighted":
-        return np.average(recalls, weights=supports)
-    else:
-        raise ValueError("Supported averages: 'macro', 'weighted'")
-
-def classification_report_manual(y_true, y_pred, target_names=None, zero_division=0):
-    labels = np.unique(np.concatenate([y_true, y_pred]))
-    precisions, recalls, f1s, supports = precision_recall_f1_support_manual(
-        y_true, y_pred, labels, zero_division
-    )
+    precisions = np.array(precisions)
+    recalls = np.array(recalls)
+    f1s = np.array(f1s)
+    supports = np.array(supports)
     if target_names is None:
         target_names = [str(label) for label in labels]
     accuracy = accuracy_score_manual(y_true, y_pred)
@@ -213,15 +186,16 @@ def classification_report_manual(y_true, y_pred, target_names=None, zero_divisio
     weighted_f1 = np.average(f1s, weights=supports)
     lines = []
     lines.append(f"{'':>25}{'precision':>12}{'recall':>12}{'f1-score':>12}{'support':>12}")
-
     for name, p, r, f1, s in zip(target_names, precisions, recalls, f1s, supports):
-        lines.append(f"{name:>25}{p:>12.4f}{r:>12.4f}{f1:>12.4f}{s:>12}")
+        lines.append(f"{name:>25}{p:>12.4f}{r:>12.4f}{f1:>12.4f}{int(s):>12}")
     lines.append("")
-    lines.append(f"{'accuracy':>25}{'':>12}{'':>12}{accuracy:>12.4f}{np.sum(supports):>12}")
-    lines.append(f"{'macro avg':>25}{macro_precision:>12.4f}{macro_recall:>12.4f}{macro_f1:>12.4f}{np.sum(supports):>12}")
-    lines.append(f"{'weighted avg':>25}{weighted_precision:>12.4f}{weighted_recall:>12.4f}{weighted_f1:>12.4f}{np.sum(supports):>12}")
+    lines.append(f"{'accuracy':>25}{'':>12}{'':>12}{accuracy:>12.4f}{int(np.sum(supports)):>12}")
+    lines.append(f"{'macro avg':>25}{macro_precision:>12.4f}{macro_recall:>12.4f}{macro_f1:>12.4f}{int(np.sum(supports)):>12}")
+    lines.append(f"{'weighted avg':>25}{weighted_precision:>12.4f}{weighted_recall:>12.4f}{weighted_f1:>12.4f}{int(np.sum(supports)):>12}")
     return "\n".join(lines)
 
+
+# Load 20 Newsgroups dataset
 train_data = fetch_20newsgroups(
     subset="train",
     remove=("headers", "footers", "quotes"),
@@ -240,41 +214,54 @@ X_train = train_data.data
 y_train = np.array(train_data.target)
 X_test = test_data.data
 y_test = np.array(test_data.target)
+target_names = train_data.target_names
+
+# Text vectorization
 vectorizer = CountVectorizerManual(
     stop_words=ENGLISH_STOP_WORDS,
     min_df=2
 )
+
 X_train_vec = vectorizer.fit_transform(X_train)
 X_test_vec = vectorizer.transform(X_test)
 
-
+# Train Multinomial Naive Bayes classifier
 model = MultinomialNBManual(alpha=0.5)
 model.fit(X_train_vec, y_train, vocab_size=len(vectorizer.vocabulary_))
+
+# Predict on test data
 y_pred = model.predict(X_test_vec)
 
+# Confusion matrix
+labels = np.arange(len(target_names))
+cm = confusion_matrix_manual(y_test, y_pred, labels=labels)
 
+# Metrics derived from predictions / confusion matrix
 accuracy = accuracy_score_manual(y_test, y_pred)
-precision = precision_score_manual(y_test, y_pred, average="weighted", zero_division=0)
-recall = recall_score_manual(y_test, y_pred, average="weighted", zero_division=0)
-cm = confusion_matrix_manual(y_test, y_pred, labels=np.arange(len(train_data.target_names)))
+_, _, _, weighted_precision, weighted_recall = precision_recall_from_confusion_matrix(cm)
+
 print("===== 20 Newsgroups : Multinomial Naive Bayes =====")
-print(f"\nAccuracy : {accuracy:.4f}")
-print(f"Precision: {precision:.4f}")
-print(f"Recall   : {recall:.4f}")
+print("\nTask: Text Classification on 20 Newsgroups Dataset")
+print(f"\nNumber of training documents : {len(X_train)}")
+print(f"Number of testing documents  : {len(X_test)}")
+print(f"Vocabulary size              : {len(vectorizer.vocabulary_)}")
 print("\nConfusion Matrix:")
 print(cm)
+print(f"\nAccuracy : {accuracy:.4f}")
+print(f"Precision: {weighted_precision:.4f}")
+print(f"Recall   : {weighted_recall:.4f}")
 print("\nClassification Report:")
 print(classification_report_manual(
     y_test,
     y_pred,
-    target_names=train_data.target_names,
+    target_names=target_names,
     zero_division=0
 ))
 print("\nFew sample predictions:")
 for i in range(5):
     text_preview = X_test[i][:250].replace("\n", " ")
-    actual_label = train_data.target_names[y_test[i]]
-    predicted_label = train_data.target_names[y_pred[i]]
+    actual_label = target_names[y_test[i]]
+    predicted_label = target_names[y_pred[i]]
     print(f"\nSample {i+1}")
     print(f"Actual   : {actual_label}")
     print(f"Predicted: {predicted_label}")

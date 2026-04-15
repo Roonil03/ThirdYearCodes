@@ -132,57 +132,77 @@ if list(df.columns) != expected_cols and len(df.columns) == 9:
         df = pd.read_csv(file_path, header=None, names=expected_cols)
 
 zero_as_missing = ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"]
-for col in zero_as_missing:
-    df[col] = df[col].replace(0, np.nan)
-    df[col] = df[col].fillna(df[col].median())
 
-X = df.drop("Outcome", axis=1)
-y = df["Outcome"]
+X = df.drop("Outcome", axis=1).copy()
+y = df["Outcome"].copy()
 
-X_train, X_test, y_train, y_test = stratified_train_test_split(
-    X, y,
-    test_size=0.2,
-    random_state=42
-)
-
-# Manual Gaussian Naive Bayes
-model = GaussianNBManual()
-model.fit(X_train, y_train)
-
-# Predictions
-y_pred = model.predict(X_test)
-y_prob = model.predict_proba(X_test)
-
-# Metrics
-cm = confusion_matrix_manual(y_test, y_pred)
-tn, fp, fn, tp = cm.ravel()
-
-accuracy = (tp + tn) / (tp + tn + fp + fn)
-precision = tp / (tp + fp) if (tp + fp) != 0 else 0
-recall = tp / (tp + fn) if (tp + fn) != 0 else 0
-
-print("Confusion Matrix:")
-print(cm)
-print(f"Accuracy : {accuracy:.4f}")
-print(f"Precision: {precision:.4f}")
-print(f"Recall   : {recall:.4f}")
+test_random_states = [42, 7, 99]   # few different test data sets
+all_metrics = []
 
 print("\nPima Indians Diabetes : Gaussian Naive Bayes")
-print("\nConfusion Matrix:")
-print(cm)
-print(f"\nAccuracy : {accuracy:.4f}")
-print(f"Precision: {precision:.4f}")
-print(f"Recall   : {recall:.4f}")
+print("=" * 60)
 
-print("\nClassification Report:")
-print(classification_report_manual(y_test, y_pred, zero_division=0))
+for split_no, rs in enumerate(test_random_states, start=1):
+    print(f"\nTEST DATA SET {split_no}  (random_state = {rs})")
+    print("-" * 60)
 
-# Show some predictions
-results = X_test.copy()
-results["Actual"] = y_test.values
-results["Predicted"] = y_pred
-results["P(Non-Diabetic=0)"] = y_prob[:, 0]
-results["P(Diabetic=1)"] = y_prob[:, 1]
+    X_train, X_test, y_train, y_test = stratified_train_test_split(
+        X, y,
+        test_size=0.2,
+        random_state=rs
+    )
 
-print("\nFew test data predictions:")
-print(results.head(10))
+    # Replace zero values using training-set medians only
+    for col in zero_as_missing:
+        train_median = X_train[col].replace(0, np.nan).median()
+        X_train[col] = X_train[col].replace(0, np.nan).fillna(train_median)
+        X_test[col] = X_test[col].replace(0, np.nan).fillna(train_median)
+
+    # Train Gaussian Naive Bayes
+    model = GaussianNBManual()
+    model.fit(X_train, y_train)
+
+    # Predict on this test set
+    y_pred = model.predict(X_test)
+    y_prob = model.predict_proba(X_test)
+
+    # Confusion matrix and metrics
+    cm = confusion_matrix_manual(y_test, y_pred)
+    tn, fp, fn, tp = cm.ravel()
+
+    accuracy = (tp + tn) / (tp + tn + fp + fn)
+    precision = tp / (tp + fp) if (tp + fp) != 0 else 0
+    recall = tp / (tp + fn) if (tp + fn) != 0 else 0
+
+    all_metrics.append((accuracy, precision, recall))
+
+    print("Confusion Matrix:")
+    print(cm)
+    print(f"Accuracy : {accuracy:.4f}")
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall   : {recall:.4f}")
+
+    print("\nClassification Report:")
+    print(classification_report_manual(y_test, y_pred, zero_division=0))
+
+    # Show a few test rows from this test set
+    results = X_test.copy()
+    results["Actual"] = y_test.values
+    results["Predicted"] = y_pred
+    results["P(Non-Diabetic=0)"] = y_prob[:, 0]
+    results["P(Diabetic=1)"] = y_prob[:, 1]
+
+    print("\nFew test data predictions:")
+    print(results.head(5))
+
+# Average metrics over all test data sets
+avg_accuracy = np.mean([m[0] for m in all_metrics])
+avg_precision = np.mean([m[1] for m in all_metrics])
+avg_recall = np.mean([m[2] for m in all_metrics])
+
+print("\n" + "=" * 60)
+print("AVERAGE PERFORMANCE OVER FEW TEST DATA SETS")
+print("=" * 60)
+print(f"Average Accuracy : {avg_accuracy:.4f}")
+print(f"Average Precision: {avg_precision:.4f}")
+print(f"Average Recall   : {avg_recall:.4f}")
