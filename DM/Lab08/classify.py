@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import math
+import csv
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
-
 
 @dataclass
 class Node:
@@ -14,7 +14,6 @@ class Node:
     children: Dict[Any, "Node"] = field(default_factory=dict)
     def is_leaf(self) -> bool:
         return self.label is not None
-
 
 def entropy(labels: List[str]) -> float:
     total = len(labels)
@@ -27,11 +26,9 @@ def entropy(labels: List[str]) -> float:
         ent -= p * math.log2(p)
     return ent
 
-
 def majority_class(rows: List[Dict[str, Any]], target: str) -> str:
     counts = Counter(row[target] for row in rows)
     return counts.most_common(1)[0][0]
-
 
 def information_gain(rows: List[Dict[str, Any]], attribute: str, target: str) -> float:
     total_entropy = entropy([row[target] for row in rows])
@@ -41,7 +38,6 @@ def information_gain(rows: List[Dict[str, Any]], attribute: str, target: str) ->
         subset = [row for row in rows if row[attribute] == value]
         weighted_entropy += (len(subset) / len(rows)) * entropy([row[target] for row in subset])
     return total_entropy - weighted_entropy
-
 
 def id3(rows: List[Dict[str, Any]], attributes: List[str], target: str) -> Node:
     labels = [row[target] for row in rows]
@@ -63,7 +59,6 @@ def id3(rows: List[Dict[str, Any]], attributes: List[str], target: str) -> Node:
             node.children[value] = id3(subset, remaining_attrs, target)
     return node
 
-
 def print_rules(node: Node, target_name: str, conditions: Optional[List[str]] = None) -> None:
     if conditions is None:
         conditions = []
@@ -74,7 +69,6 @@ def print_rules(node: Node, target_name: str, conditions: Optional[List[str]] = 
     for value, child in node.children.items():
         print_rules(child, target_name, conditions + [f"{node.attribute} = {value}"])
 
-
 def predict(node: Node, sample: Dict[str, Any]) -> str:
     current = node
     while not current.is_leaf():
@@ -83,8 +77,7 @@ def predict(node: Node, sample: Dict[str, Any]) -> str:
         if value not in current.children:
             return current.majority_class
         current = current.children[value]
-    return current.label  # type: ignore
-
+    return current.label
 
 def predict_with_trace(node: Node, sample: Dict[str, Any]) -> Tuple[str, List[str]]:
     current = node
@@ -100,52 +93,32 @@ def predict_with_trace(node: Node, sample: Dict[str, Any]) -> Tuple[str, List[st
     trace.append(f"Predicted class = {current.label}")
     return current.label, trace
 
+def load_csv(file_path: str) -> List[Dict[str, Any]]:
+    with open(file_path, mode="r", newline="") as file:
+        reader = csv.DictReader(file)
+        return [row for row in reader]
 
 def main() -> None:
-    data = [
-        {"Day": "D1",  "Outlook": "Sunny",    "Temperature": "Hot",  "Humidity": "High",   "Wind": "Weak",   "Play ball": "No"},
-        {"Day": "D2",  "Outlook": "Sunny",    "Temperature": "Hot",  "Humidity": "High",   "Wind": "Strong", "Play ball": "No"},
-        {"Day": "D3",  "Outlook": "Overcast", "Temperature": "Hot",  "Humidity": "High",   "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D4",  "Outlook": "Rain",     "Temperature": "Mild", "Humidity": "High",   "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D5",  "Outlook": "Rain",     "Temperature": "Cool", "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D6",  "Outlook": "Rain",     "Temperature": "Cool", "Humidity": "Normal", "Wind": "Strong", "Play ball": "No"},
-        {"Day": "D7",  "Outlook": "Overcast", "Temperature": "Cool", "Humidity": "Normal", "Wind": "Strong", "Play ball": "Yes"},
-        {"Day": "D8",  "Outlook": "Sunny",    "Temperature": "Mild", "Humidity": "High",   "Wind": "Weak",   "Play ball": "No"},
-        {"Day": "D9",  "Outlook": "Sunny",    "Temperature": "Cool", "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D10", "Outlook": "Rain",     "Temperature": "Mild", "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D11", "Outlook": "Sunny",    "Temperature": "Mild", "Humidity": "Normal", "Wind": "Strong", "Play ball": "Yes"},
-        {"Day": "D12", "Outlook": "Overcast", "Temperature": "Mild", "Humidity": "High",   "Wind": "Strong", "Play ball": "Yes"},
-        {"Day": "D13", "Outlook": "Overcast", "Temperature": "Hot",  "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D14", "Outlook": "Rain",     "Temperature": "Mild", "Humidity": "High",   "Wind": "Strong", "Play ball": "No"},
-    ]
-
+    file_path = ".\\PlayBall.csv"
+    data = load_csv(file_path)
     target = "Play ball"
-    attributes = [col for col in data[0].keys() if col != target]
+    attributes = ["Outlook", "Temperature", "Humidity", "Wind"]
     tree = id3(data, attributes, target)
-    print("=" * 60)
     print("RULES OBTAINED FROM THE DECISION TREE")
-    print("=" * 60)
     print_rules(tree, target)
-    print("\n" + "=" * 60)
-    print("CLASSIFYING NEW SAMPLES")
-    print("=" * 60)
-
+    print("\nCLASSIFYING NEW SAMPLES")
     new_samples = [
-        {"Outlook": "Sunny", "Temperature": "Cool", "Humidity": "High",   "Wind": "Strong"},
-        {"Outlook": "Rain",  "Temperature": "Mild", "Humidity": "Normal", "Wind": "Weak"},
+        {"Outlook": "Sunny", "Temperature": "Cool", "Humidity": "High", "Wind": "Strong"},
+        {"Outlook": "Rain", "Temperature": "Mild", "Humidity": "Normal", "Wind": "Weak"},
         {"Outlook": "Overcast", "Temperature": "Hot", "Humidity": "High", "Wind": "Strong"},
     ]
-
     for i, sample in enumerate(new_samples, start=1):
         prediction, trace = predict_with_trace(tree, sample)
         print(f"\nSample {i}: {sample}")
         for step in trace:
             print("  " + step)
         print(f"  Final classification: {prediction}")
-
-    print("\n" + "=" * 60)
-    print("INTERACTIVE CLASSIFICATION")
-    print("=" * 60)
+    print("\nINTERACTIVE CLASSIFICATION")
     print("Enter a new sample using the following values:")
     print("Outlook     : Sunny / Overcast / Rain")
     print("Temperature : Hot / Mild / Cool")
@@ -162,7 +135,6 @@ def main() -> None:
     for step in trace:
         print("  " + step)
     print(f"\nPredicted class for your sample: {prediction}")
-
 
 if __name__ == "__main__":
     main()

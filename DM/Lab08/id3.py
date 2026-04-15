@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import csv
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
@@ -119,47 +120,25 @@ def print_rules(node: Node, target_name: str, conditions: Optional[List[str]] = 
         print_rules(child, target_name, conditions + [f"{node.attribute} = {value}"])
 
 
+def load_csv(file_path: str) -> List[Dict[str, Any]]:
+    with open(file_path, mode="r", newline="") as file:
+        reader = csv.DictReader(file)
+        return [row for row in reader]
+
+
 def main() -> None:
-    data = [
-        {"Day": "D1",  "Outlook": "Sunny",    "Temperature": "Hot",  "Humidity": "High",   "Wind": "Weak",   "Play ball": "No"},
-        {"Day": "D2",  "Outlook": "Sunny",    "Temperature": "Hot",  "Humidity": "High",   "Wind": "Strong", "Play ball": "No"},
-        {"Day": "D3",  "Outlook": "Overcast", "Temperature": "Hot",  "Humidity": "High",   "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D4",  "Outlook": "Rain",     "Temperature": "Mild", "Humidity": "High",   "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D5",  "Outlook": "Rain",     "Temperature": "Cool", "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D6",  "Outlook": "Rain",     "Temperature": "Cool", "Humidity": "Normal", "Wind": "Strong", "Play ball": "No"},
-        {"Day": "D7",  "Outlook": "Overcast", "Temperature": "Cool", "Humidity": "Normal", "Wind": "Strong", "Play ball": "Yes"},
-        {"Day": "D8",  "Outlook": "Sunny",    "Temperature": "Mild", "Humidity": "High",   "Wind": "Weak",   "Play ball": "No"},
-        {"Day": "D9",  "Outlook": "Sunny",    "Temperature": "Cool", "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D10", "Outlook": "Rain",     "Temperature": "Mild", "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D11", "Outlook": "Sunny",    "Temperature": "Mild", "Humidity": "Normal", "Wind": "Strong", "Play ball": "Yes"},
-        {"Day": "D12", "Outlook": "Overcast", "Temperature": "Mild", "Humidity": "High",   "Wind": "Strong", "Play ball": "Yes"},
-        {"Day": "D13", "Outlook": "Overcast", "Temperature": "Hot",  "Humidity": "Normal", "Wind": "Weak",   "Play ball": "Yes"},
-        {"Day": "D14", "Outlook": "Rain",     "Temperature": "Mild", "Humidity": "High",   "Wind": "Strong", "Play ball": "No"},
-    ]
-
+    file_path = ".\\PlayBall.csv"
+    data = load_csv(file_path)
     target = "Play ball"
-
     attributes = ["Outlook", "Temperature", "Humidity", "Wind"]
-
-    print("=" * 60)
-    print("ID3 DECISION TREE USING TABLE 1")
-    print("=" * 60)
-
+    print("ID3 DECISION TREE USING CSV DATA")
     base_entropy = entropy([row[target] for row in data])
     print(f"\nEntropy(S) = {base_entropy:.4f}\n")
-
     tree = id3(data, attributes, target, verbose=True)
-
-    print("\n" + "=" * 60)
-    print("FINAL DECISION TREE")
-    print("=" * 60)
+    print("\nFINAL DECISION TREE")
     print_tree(tree)
-
-    print("\n" + "=" * 60)
-    print("RULES")
-    print("=" * 60)
+    print("\nRULES")
     print_rules(tree, target)
-
 
 if __name__ == "__main__":
     main()
