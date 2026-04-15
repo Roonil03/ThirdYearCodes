@@ -1,7 +1,7 @@
 import pandas as pd
 from itertools import combinations
 
-file_path = "D:\\230911172_DM\\Lab06\\GroceriesDataset.csv"
+file_path = ".\\GroceriesDataset.csv"
 transactions = []
 with open(file_path) as f:
     for line in f:

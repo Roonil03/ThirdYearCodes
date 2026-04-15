@@ -1,6 +1,6 @@
 from itertools import combinations
 
-file_url = "D:\\230911172_DM\\Lab06\\GroceriesDataset.csv"
+file_url = ".\\GroceriesDataset.csv"
 
 transactions = []
 with open(file_url) as f:
