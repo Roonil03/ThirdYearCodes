@@ -1,7 +1,7 @@
 import pandas as pd
 import random
 
-file_path = "D:\\230911172_DM\\Lab07\\IrisDataset.csv"
+file_path = ".\\IrisDataset.csv"
 data = pd.read_csv(file_path)
 X = data.iloc[:,0:4].values.tolist()
 k = 3
