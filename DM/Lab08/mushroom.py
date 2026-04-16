@@ -57,7 +57,6 @@ def entropy(labels: List[str]) -> float:
         ent -= p * math.log2(p)
     return ent
 
-
 def majority_class(rows: List[Dict[str, Any]], target: str) -> str:
     counts = Counter(row[target] for row in rows)
     return counts.most_common(1)[0][0]
@@ -70,7 +69,6 @@ def information_gain(rows: List[Dict[str, Any]], attribute: str, target: str) ->
         subset = [row for row in rows if row[attribute] == value]
         weighted_entropy += (len(subset) / len(rows)) * entropy([row[target] for row in subset])
     return base_entropy - weighted_entropy
-
 
 def id3(rows: List[Dict[str, Any]], attributes: List[str], target: str) -> Node:
     labels = [row[target] for row in rows]
@@ -91,7 +89,6 @@ def id3(rows: List[Dict[str, Any]], attributes: List[str], target: str) -> Node:
             node.children[value] = id3(subset, remaining_attrs, target)
     return node
 
-
 def predict(node: Node, sample: Dict[str, Any]) -> str:
     current = node
     while not current.is_leaf():
@@ -102,7 +99,6 @@ def predict(node: Node, sample: Dict[str, Any]) -> str:
         current = current.children[value]
     return current.label
 
-
 def accuracy(node: Node, rows: List[Dict[str, Any]], target: str) -> float:
     correct = 0
     for row in rows:
@@ -110,18 +106,15 @@ def accuracy(node: Node, rows: List[Dict[str, Any]], target: str) -> float:
             correct += 1
     return correct / len(rows)
 
-
 def count_nodes(node: Node) -> int:
     if node.is_leaf():
         return 1
     return 1 + sum(count_nodes(child) for child in node.children.values())
 
-
 def count_leaves(node: Node) -> int:
     if node.is_leaf():
         return 1
     return sum(count_leaves(child) for child in node.children.values())
-
 
 def print_tree(node: Node, indent: str = "", max_depth: int = 3, current_depth: int = 0) -> None:
     if node.is_leaf():
@@ -134,7 +127,6 @@ def print_tree(node: Node, indent: str = "", max_depth: int = 3, current_depth: 
     for value, child in node.children.items():
         print(indent + f"  {node.attribute} = {value}")
         print_tree(child, indent + "    ", max_depth, current_depth + 1)
-
 
 def tree_to_dot(root: Node, target_name: str = "class") -> str:
     lines = [
@@ -166,7 +158,6 @@ def tree_to_dot(root: Node, target_name: str = "class") -> str:
     lines.append("}")
     return "\n".join(lines)
 
-
 def ensure_local_dataset() -> Path:
     base_dir = Path.cwd()
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -191,14 +182,12 @@ def ensure_local_dataset() -> Path:
             f"3. Run the script again."
         ) from e
 
-
 def load_dataset() -> pd.DataFrame:
     dataset_path = ensure_local_dataset()
     df = pd.read_csv(dataset_path, header=None, names=COLUMNS)
     df = df.replace("?", "missing")
     df["class"] = df["class"].map({"e": "edible", "p": "poisonous"})
     return df
-
 
 def main() -> None:
     print("=" * 60)
@@ -235,7 +224,6 @@ def main() -> None:
     print("\nExample classification on first sample:")
     print(f"True class     : {true_class}")
     print(f"Predicted class: {predicted}")
-
 
 if __name__ == "__main__":
     main()
