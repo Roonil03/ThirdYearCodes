@@ -54,29 +54,23 @@ def apriori_partition(dataset, min_support_local):
 partitions = []
 for i in range(0, num_transactions, partition_size):
     partitions.append(transactions[i:i+partition_size])
-
 print("Total partitions:", len(partitions))
-
 candidate_itemsets = set()
 for partition in partitions:
     local_support = min_support * len(partition)
     local_freq = apriori_partition(partition, local_support)
     candidate_itemsets |= local_freq
-
 print("Candidate itemsets from partitions:", len(candidate_itemsets))
-
 global_frequent = {}
 for itemset in candidate_itemsets:
     count = support_count(itemset, transactions)
     if count >= min_support_count:
         global_frequent[itemset] = count / num_transactions
-
 print("\nFrequent Itemsets:\n")
 for itemset, support in global_frequent.items():
     print(set(itemset), "Support:", round(support,3))
 
 print("\nAssociation Rules:\n")
-
 for itemset in global_frequent:
     if len(itemset) < 2:
         continue

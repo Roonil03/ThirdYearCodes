@@ -53,7 +53,6 @@ while Lk:
     Lk = new_Lk
     k += 1
 
-
 print("Frequent Itemsets:\n")
 for itemset, support in freq_itemsets.items():
     print(set(itemset), "Support:", round(support, 3))
